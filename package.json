@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:eval": "vitest run --config vitest.eval.config.mts",
+    "seed": "bun run supabase/seed.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",

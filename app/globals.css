@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* V0 ships dark-mode only — see PLAN.md §0. Hard-coded values override
+     prefers-color-scheme so the app looks right regardless of OS setting. */
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +14,76 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Tremor / Recharts dark-mode overrides
+   Tremor 3.x has no built-in dark mode — its chart text and grid lines fall
+   back to default Recharts colors (#666 axis text, #ccc grid lines) which
+   disappear on black. These selectors target the underlying SVG.
+--------------------------------------------------------------------------- */
+
+/* Axis tick labels (date strings, $ amounts) */
+.recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis text {
+  fill: #a3a3a3 !important;          /* neutral-400 */
+}
+
+/* Axis lines — white for V0 visibility. Lower contrast version is V0.5+. */
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: #ededed !important;         /* near-white */
+}
+
+/* Grid lines (Tremor calls showGridLines={false}, but in case enabled) */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #404040 !important;         /* neutral-700 — kept dim so the chart line stands out */
+}
+
+/* The chart line itself — white. Overrides the emerald/rose color logic in
+   PriceChart.tsx for V0 visibility. Restore semantic colors in V0.5 once the
+   Tremor → CSS interaction is properly understood. */
+.recharts-line-curve,
+.recharts-line .recharts-curve {
+  stroke: #ededed !important;
+  stroke-width: 2 !important;
+}
+
+/* Data points (dots on the line) */
+.recharts-line-dots circle,
+.recharts-dot {
+  fill: #ededed !important;
+  stroke: #ededed !important;
+}
+
+/* Active dot (the one being hovered) */
+.recharts-active-dot {
+  fill: #ededed !important;
+  stroke: #0a0a0a !important;          /* ring against the white dot for click affordance */
+  stroke-width: 2 !important;
+}
+
+/* Legend (we hide it, but if it ever shows) */
+.recharts-legend-item-text {
+  color: #ededed !important;
+}
+
+/* Default tooltip — we use customTooltip, but covers any other chart variant */
+.recharts-default-tooltip {
+  background-color: #141414 !important;
+  border: 1px solid #2a2a2a !important;
+  color: #ededed !important;
+}
+
+/* Tremor's own tooltip wrappers */
+.tremor-Chart-tooltipWrapper,
+.tremor-LineChart-tooltipWrapper {
+  background-color: #141414 !important;
+  border: 1px solid #2a2a2a !important;
+  color: #ededed !important;
 }
