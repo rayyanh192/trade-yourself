@@ -1,65 +1,61 @@
-import Image from "next/image";
+// V0 home. Step 3 acceptance: signed-in user lands here and sees their email +
+// the row from public.users (proves the auth trigger fired). Signed-out user
+// gets redirected to /login.
+//
+// In Step 6 (IPO baseline onboarding) this page will start redirecting to
+// /onboarding when ipo_date is null and to /dashboard when it is set. For now
+// it just confirms auth works.
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { SignOutButton } from './sign-out-button';
+
+export default async function Home() {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        redirect('/login');
+    }
+
+    // Read the public.users row that the auth trigger created on signup.
+    const { data: profile } = await supabase
+        .from('users')
+        .select('id, email, display_name, ticker_symbol, ipo_date, baseline_price')
+        .eq('id', user.id)
+        .single();
+
+    return (
+        <main className="min-h-screen bg-black text-neutral-200 flex items-center justify-center p-6">
+            <div className="w-full max-w-md">
+                <h1 className="text-3xl font-medium mb-1">Signed in.</h1>
+                <p className="text-neutral-400 text-sm mb-8">
+                    Auth works. The trigger created your <code className="text-neutral-300">public.users</code> row.
+                </p>
+
+                <div className="border border-neutral-800 rounded p-4 bg-neutral-950 text-sm">
+                    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                        <dt className="text-neutral-500">auth.user.id</dt>
+                        <dd className="text-neutral-300 font-mono text-xs break-all">{user.id}</dd>
+
+                        <dt className="text-neutral-500">email</dt>
+                        <dd className="text-neutral-300">{user.email}</dd>
+
+                        <dt className="text-neutral-500">display_name</dt>
+                        <dd className="text-neutral-300">{profile?.display_name ?? '—'}</dd>
+
+                        <dt className="text-neutral-500">baseline_price</dt>
+                        <dd className="text-neutral-300">${profile?.baseline_price ?? '—'}</dd>
+
+                        <dt className="text-neutral-500">ipo_date</dt>
+                        <dd className="text-neutral-300">{profile?.ipo_date ?? '(not onboarded yet)'}</dd>
+                    </dl>
+                </div>
+
+                <div className="mt-6">
+                    <SignOutButton />
+                </div>
+            </div>
+        </main>
+    );
 }
