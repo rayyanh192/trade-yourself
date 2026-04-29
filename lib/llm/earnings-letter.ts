@@ -43,7 +43,7 @@ Output: the letter as plain text. No greeting, no signoff, no quotation marks.
 
 export async function generateLetter(input: LetterInput): Promise<string> {
     const { text } = await generateText({
-        model: anthropic('claude-sonnet-4-5'),
+        model: anthropic('claude-haiku-4-5-20251001'),
         prompt: EARNINGS_LETTER_PROMPT(input),
         maxRetries: 2,
     });

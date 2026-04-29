@@ -40,7 +40,7 @@ export async function scoreEntry(
     opts?: { baseline_assessment_text?: string | null },
 ): Promise<ScoreResult> {
     const { object } = await generateObject({
-        model: anthropic('claude-sonnet-4-5'),
+        model: anthropic('claude-haiku-4-5-20251001'),
         schema: ScoreSchema,
         system: SCORE_SYSTEM_MESSAGE,
         prompt: SCORE_USER_TEMPLATE(text, opts?.baseline_assessment_text ?? null),
