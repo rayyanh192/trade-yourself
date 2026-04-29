@@ -1,89 +1,73 @@
 @import "tailwindcss";
 
+/* youinc design tokens — referenced via Tailwind arbitrary values
+   (bg-[var(--bg-1)]) or inline style props in dashboard components. */
 :root {
-  /* V0 ships dark-mode only — see PLAN.md §0. Hard-coded values override
-     prefers-color-scheme so the app looks right regardless of OS setting. */
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --bg-0: oklch(0.16 0.012 50);
+  --bg-1: oklch(0.19 0.013 50);
+  --bg-2: oklch(0.23 0.014 50);
+  --bg-3: oklch(0.28 0.015 50);
+
+  --line: oklch(0.30 0.012 50);
+  --line-soft: oklch(0.24 0.010 50);
+
+  --text-0: oklch(0.96 0.008 80);
+  --text-1: oklch(0.78 0.010 70);
+  --text-2: oklch(0.58 0.012 60);
+  --text-3: oklch(0.42 0.010 60);
+
+  --gain: oklch(0.78 0.16 145);
+  --gain-soft: oklch(0.78 0.16 145 / 0.12);
+  --loss: oklch(0.68 0.18 28);
+  --loss-soft: oklch(0.68 0.18 28 / 0.12);
+
+  --amber: oklch(0.80 0.14 75);
+  --amber-soft: oklch(0.80 0.14 75 / 0.12);
+
+  --background: var(--bg-0);
+  --foreground: var(--text-0);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-serif: var(--font-source-serif);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11', 'ss01';
 }
 
-/* ---------------------------------------------------------------------------
-   Tremor / Recharts dark-mode overrides
-   Tremor 3.x has no built-in dark mode — its chart text and grid lines fall
-   back to default Recharts colors (#666 axis text, #ccc grid lines) which
-   disappear on black. These selectors target the underlying SVG.
---------------------------------------------------------------------------- */
-
-/* Axis tick labels (date strings, $ amounts) */
-.recharts-cartesian-axis-tick text,
-.recharts-cartesian-axis text {
-  fill: #a3a3a3 !important;          /* neutral-400 */
+::selection {
+  background: var(--amber-soft);
+  color: var(--text-0);
 }
 
-/* Axis lines — white for V0 visibility. Lower contrast version is V0.5+. */
-.recharts-cartesian-axis-line,
-.recharts-cartesian-axis-tick-line {
-  stroke: #ededed !important;         /* near-white */
+/* Animations referenced by dashboard components */
+@keyframes yi-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes yi-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes yi-fadein {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes yi-pulse-ring {
+  0% { r: 4; stroke-opacity: 0.5; }
+  100% { r: 14; stroke-opacity: 0; }
 }
 
-/* Grid lines (Tremor calls showGridLines={false}, but in case enabled) */
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke: #404040 !important;         /* neutral-700 — kept dim so the chart line stands out */
-}
-
-/* The chart line itself — white. Overrides the emerald/rose color logic in
-   PriceChart.tsx for V0 visibility. Restore semantic colors in V0.5 once the
-   Tremor → CSS interaction is properly understood. */
-.recharts-line-curve,
-.recharts-line .recharts-curve {
-  stroke: #ededed !important;
-  stroke-width: 2 !important;
-}
-
-/* Data points (dots on the line) */
-.recharts-line-dots circle,
-.recharts-dot {
-  fill: #ededed !important;
-  stroke: #ededed !important;
-}
-
-/* Active dot (the one being hovered) */
-.recharts-active-dot {
-  fill: #ededed !important;
-  stroke: #0a0a0a !important;          /* ring against the white dot for click affordance */
-  stroke-width: 2 !important;
-}
-
-/* Legend (we hide it, but if it ever shows) */
-.recharts-legend-item-text {
-  color: #ededed !important;
-}
-
-/* Default tooltip — we use customTooltip, but covers any other chart variant */
-.recharts-default-tooltip {
-  background-color: #141414 !important;
-  border: 1px solid #2a2a2a !important;
-  color: #ededed !important;
-}
-
-/* Tremor's own tooltip wrappers */
-.tremor-Chart-tooltipWrapper,
-.tremor-LineChart-tooltipWrapper {
-  background-color: #141414 !important;
-  border: 1px solid #2a2a2a !important;
-  color: #ededed !important;
-}
+.yi-animate-pulse-dot { animation: yi-pulse 2.4s ease-in-out infinite; }
+.yi-animate-spin { animation: yi-spin 0.7s linear infinite; }
+.yi-animate-fadein { animation: yi-fadein 0.4s ease forwards; }
